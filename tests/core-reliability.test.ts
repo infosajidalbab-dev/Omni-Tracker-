@@ -8,6 +8,7 @@
  * 5. Safe JSON backup validation, version warnings, schema corruption detection, and restoration strategies
  */
 
+import { describe, it } from 'vitest';
 import { 
   getLocalDateString, 
   getLocalMonthString, 
@@ -243,7 +244,8 @@ async function runTests() {
   console.log(`\n🎉 ALL TESTS PASSED! (${passedTests} / ${totalTests} assertions passed)`);
 }
 
-runTests().catch(err => {
-  console.error('\nTest runner failed:', err);
-  process.exit(1);
+describe('OMNI TRACKER Core Reliability', () => {
+  it('passes all date, streak, CSV, and backup tests', async () => {
+    await runTests();
+  });
 });

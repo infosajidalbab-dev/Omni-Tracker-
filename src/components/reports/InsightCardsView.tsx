@@ -248,61 +248,73 @@ export const InsightCardsView: React.FC<InsightCardsViewProps> = ({
           <span className="text-xs text-slate-400 font-semibold">100% Private &amp; Local</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {insights.map((item) => {
-            let borderClass = 'border-slate-200/70 dark:border-white/10';
-            let iconEl = <Info className="w-4 h-4 text-[#38BDF8]" />;
-            let pillClass = 'bg-[#38BDF8]/15 text-[#38BDF8]';
+        {insights.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {insights.map((item) => {
+              let borderClass = 'border-slate-200/70 dark:border-white/10';
+              let iconEl = <Info className="w-4 h-4 text-[#38BDF8]" />;
+              let pillClass = 'bg-[#38BDF8]/15 text-[#38BDF8]';
 
-            if (item.severity === 'positive') {
-              borderClass = 'border-[#22C58B]/40 bg-[#22C58B]/[0.03]';
-              iconEl = <CheckCircle2 className="w-4 h-4 text-[#22C58B]" />;
-              pillClass = 'bg-[#22C58B]/15 text-[#16A34A] dark:text-[#22C58B]';
-            } else if (item.severity === 'warning') {
-              borderClass = 'border-amber-500/40 bg-amber-500/[0.03]';
-              iconEl = <AlertTriangle className="w-4 h-4 text-amber-500" />;
-              pillClass = 'bg-amber-500/15 text-amber-600 dark:text-amber-400';
-            } else if (item.severity === 'urgent') {
-              borderClass = 'border-rose-500/40 bg-rose-500/[0.05]';
-              iconEl = <ShieldAlert className="w-4 h-4 text-rose-500" />;
-              pillClass = 'bg-rose-500/15 text-rose-600 dark:text-rose-400';
-            }
+              if (item.severity === 'positive') {
+                borderClass = 'border-[#22C58B]/40 bg-[#22C58B]/[0.03]';
+                iconEl = <CheckCircle2 className="w-4 h-4 text-[#22C58B]" />;
+                pillClass = 'bg-[#22C58B]/15 text-[#16A34A] dark:text-[#22C58B]';
+              } else if (item.severity === 'warning') {
+                borderClass = 'border-amber-500/40 bg-amber-500/[0.03]';
+                iconEl = <AlertTriangle className="w-4 h-4 text-amber-500" />;
+                pillClass = 'bg-amber-500/15 text-amber-600 dark:text-amber-400';
+              } else if (item.severity === 'urgent') {
+                borderClass = 'border-rose-500/40 bg-rose-500/[0.05]';
+                iconEl = <ShieldAlert className="w-4 h-4 text-rose-500" />;
+                pillClass = 'bg-rose-500/15 text-rose-600 dark:text-rose-400';
+              }
 
-            return (
-              <div
-                key={item.id}
-                className={`glass-panel p-5 border ${borderClass} transition-all hover:scale-[1.01]`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/10">
-                      {iconEl}
+              return (
+                <div
+                  key={item.id}
+                  className={`glass-panel p-5 border ${borderClass} transition-all hover:scale-[1.01]`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/10">
+                        {iconEl}
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                        {item.title}
+                      </h4>
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                      {item.title}
-                    </h4>
+
+                    {item.stat && (
+                      <div className={`px-2.5 py-1 rounded-xl text-xs font-black shrink-0 ${pillClass}`}>
+                        {item.stat}
+                      </div>
+                    )}
                   </div>
 
-                  {item.stat && (
-                    <div className={`px-2.5 py-1 rounded-xl text-xs font-black shrink-0 ${pillClass}`}>
-                      {item.stat}
+                  <p className="text-xs text-slate-600 dark:text-[#9FA2AC] mt-3 leading-relaxed">
+                    {item.description}
+                  </p>
+
+                  {item.metricLabel && (
+                    <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-[#9FA2AC]/70 mt-2">
+                      {item.metricLabel}
                     </div>
                   )}
                 </div>
-
-                <p className="text-xs text-slate-600 dark:text-[#9FA2AC] mt-3 leading-relaxed">
-                  {item.description}
-                </p>
-
-                {item.metricLabel && (
-                  <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-[#9FA2AC]/70 mt-2">
-                    {item.metricLabel}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="glass-panel py-12 text-center p-6 flex flex-col items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#FF7628]/15 text-[#FF7628] flex items-center justify-center mb-3 shadow-xs">
+              <Sparkles className="w-6 h-6 stroke-[2.2]" />
+            </div>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white">Gathering your spending patterns</h4>
+            <p className="text-xs text-slate-500 dark:text-[#9FA2AC] max-w-xs mt-1">
+              Log a few days of commute fares and habit check-ins to unlock automated insights, pacing alerts, and route intelligence.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Frequent Commute Routes & Cost Table */}

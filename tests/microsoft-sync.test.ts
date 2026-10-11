@@ -15,6 +15,7 @@
  */
 
 import 'fake-indexeddb/auto';
+import { describe, it } from 'vitest';
 import { 
   db, 
   initializeDatabase, 
@@ -313,7 +314,8 @@ async function runMicrosoftSyncTests() {
   console.log(`\n🎉 ALL MICROSOFT EXCEL & ONEDRIVE SYNC TESTS PASSED! (${passed} / ${total} assertions passed)\n`);
 }
 
-runMicrosoftSyncTests().catch(err => {
-  console.error('Fatal test runner error:', err);
-  process.exit(1);
+describe('OMNI TRACKER Microsoft Excel & OneDrive Sync', () => {
+  it('passes all Microsoft Graph and PKCE sync tests', async () => {
+    await runMicrosoftSyncTests();
+  });
 });

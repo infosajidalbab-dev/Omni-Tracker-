@@ -15,6 +15,7 @@ import {
   Plus
 } from 'lucide-react';
 import { Logo } from '../common/Logo';
+import { useTranslation } from '../../utils/i18n';
 import type { ActiveTab } from '../../types';
 
 interface SidebarProps {
@@ -38,14 +39,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onQuickAddExpense,
   pendingSyncCount,
 }) => {
+  const { t } = useTranslation();
+
   const navItems: Array<{ id: ActiveTab; label: string; icon: React.ElementType; badge?: number }> = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'expenses', label: 'Expenses', icon: Receipt },
-    { id: 'habits', label: 'Daily Habits', icon: CheckSquare },
-    { id: 'budget', label: 'Budget Plan', icon: PieChart },
-    { id: 'reports', label: 'Reports & Export', icon: BarChart3 },
-    { id: 'sync', label: 'Data Sync & Cloud', icon: RefreshCw, badge: pendingSyncCount > 0 ? pendingSyncCount : undefined },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    { id: 'expenses', label: t('expenses'), icon: Receipt },
+    { id: 'habits', label: t('habits'), icon: CheckSquare },
+    { id: 'budget', label: t('budget'), icon: PieChart },
+    { id: 'reports', label: t('reports'), icon: BarChart3 },
+    { id: 'sync', label: t('sync'), icon: RefreshCw, badge: pendingSyncCount > 0 ? pendingSyncCount : undefined },
+    { id: 'settings', label: t('settings'), icon: Settings },
   ];
 
   return (

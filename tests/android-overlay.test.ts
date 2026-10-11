@@ -13,6 +13,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { describe, it } from 'vitest';
 
 let passed = 0;
 let total = 0;
@@ -143,7 +144,8 @@ async function runAndroidOverlayTests() {
   console.log(`\n🎉 ALL ANDROID FLOATING ASSISTANT TESTS PASSED! (${passed} / ${total} assertions passed)\n`);
 }
 
-runAndroidOverlayTests().catch(err => {
-  console.error('Fatal test runner error:', err);
-  process.exit(1);
+describe('OMNI TRACKER Android Floating Assistant Architecture', () => {
+  it('passes all Android overlay verification tests', async () => {
+    await runAndroidOverlayTests();
+  });
 });

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Logo } from '../common/Logo';
 import { PWAInstallButton } from '../common/PWAInstallButton';
+import { useTranslation } from '../../utils/i18n';
 import type { ActiveTab } from '../../types';
 
 interface HeaderProps {
@@ -35,6 +36,8 @@ export const Header: React.FC<HeaderProps> = ({
   isOnline,
   pendingSyncCount,
 }) => {
+  const { t } = useTranslation();
+
   // Current time greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -102,17 +105,17 @@ export const Header: React.FC<HeaderProps> = ({
           {!isOnline ? (
             <>
               <WifiOff className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Offline</span>
+              <span className="hidden sm:inline">{t('offline')}</span>
             </>
           ) : pendingSyncCount > 0 ? (
             <>
               <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#FF7628]" />
-              <span className="text-[11px] font-bold">{pendingSyncCount} Pending</span>
+              <span className="text-[11px] font-bold">{pendingSyncCount} {t('pending')}</span>
             </>
           ) : (
             <>
               <span className="w-2 h-2 rounded-full bg-[#22C58B] inline-block animate-pulse shadow-sm shadow-[#22C58B]/50" />
-              <span className="hidden sm:inline">Synced</span>
+              <span className="hidden sm:inline">{t('synced')}</span>
             </>
           )}
         </button>

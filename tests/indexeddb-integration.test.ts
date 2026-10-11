@@ -4,6 +4,7 @@
  */
 
 import 'fake-indexeddb/auto';
+import { describe, it } from 'vitest';
 import { 
   db, 
   initializeDatabase, 
@@ -185,7 +186,8 @@ async function runIndexedDbTests() {
   console.log(`\n🎉 ALL INDEXEDDB TESTS PASSED! (${passed} / ${total} assertions passed)`);
 }
 
-runIndexedDbTests().catch(err => {
-  console.error('\nIndexedDB Test failed:', err);
-  process.exit(1);
+describe('OMNI TRACKER IndexedDB Integration', () => {
+  it('passes all IndexedDB persistence tests', async () => {
+    await runIndexedDbTests();
+  });
 });

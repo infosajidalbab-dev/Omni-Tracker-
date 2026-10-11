@@ -7,6 +7,7 @@ import {
   Plus, 
   Settings 
 } from 'lucide-react';
+import { useTranslation } from '../../utils/i18n';
 import type { ActiveTab } from '../../types';
 
 interface MobileBottomNavProps {
@@ -22,6 +23,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onQuickLog,
   theme,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <nav
       aria-label="Mobile Navigation"
@@ -43,7 +46,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           }`}
         >
           <LayoutDashboard className={`w-5 h-5 mb-0.5 ${currentTab === 'dashboard' ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
-          <span className="text-[10px] font-semibold tracking-tight">Home</span>
+          <span className="text-[10px] font-semibold tracking-tight">{t('dashboard')}</span>
         </button>
 
         {/* Expenses */}
@@ -61,7 +64,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           }`}
         >
           <Receipt className={`w-5 h-5 mb-0.5 ${currentTab === 'expenses' ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
-          <span className="text-[10px] font-semibold tracking-tight">Expense</span>
+          <span className="text-[10px] font-semibold tracking-tight">{t('expenses')}</span>
         </button>
 
         {/* Center Prominent Glowing Quick Log FAB */}
@@ -74,7 +77,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <Plus className="w-6 h-6 stroke-[3] group-hover:rotate-90 transition-transform duration-200" />
           </button>
           <span className="text-[9px] font-bold text-[#FF7628] mt-0.5 tracking-tight uppercase">
-            Quick Log
+            {t('quickLog')}
           </span>
         </div>
 
@@ -93,7 +96,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           }`}
         >
           <CheckSquare className={`w-5 h-5 mb-0.5 ${currentTab === 'habits' ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
-          <span className="text-[10px] font-semibold tracking-tight">Habits</span>
+          <span className="text-[10px] font-semibold tracking-tight">{t('habits')}</span>
         </button>
 
         {/* Reports / Settings */}
@@ -116,7 +119,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <BarChart3 className={`w-5 h-5 mb-0.5 ${currentTab === 'reports' ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
           )}
           <span className="text-[10px] font-semibold tracking-tight">
-            {currentTab === 'settings' ? 'Settings' : 'Reports'}
+            {currentTab === 'settings' ? t('settings') : t('reports')}
           </span>
         </button>
       </div>

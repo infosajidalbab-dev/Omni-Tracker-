@@ -22,6 +22,7 @@ import {
   createPkcePair,
   buildMicrosoftAuthUrl,
   exchangeCodeForTokens,
+  refreshMicrosoftAccessToken,
   type DailySummaryRow 
 } from './microsoftGraph';
 
@@ -43,6 +44,47 @@ export interface MicrosoftSyncConfig {
 const MS_CONFIG_KEY = 'omni_ms_config_v2';
 const memoryStore: Record<string, string> = {};
 
+interface SessionTokens {
+  accessToken?: string;
+  refreshToken?: string;
+  tokenExpiresAt?: number;
+}
+
+let inMemoryTokens: SessionTokens = {};
+
+function getSessionTokens(): SessionTokens {
+  if (inMemoryTokens.accessToken || inMemoryTokens.refreshToken) {
+    return inMemoryTokens;
+  }
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      const raw = sessionStorage.getItem('omni_ms_session_tokens');
+      if (raw) {
+        inMemoryTokens = JSON.parse(raw);
+        return inMemoryTokens;
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return inMemoryTokens;
+}
+
+function saveSessionTokens(tokens: SessionTokens): void {
+  inMemoryTokens = { ...tokens };
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      if (tokens.accessToken || tokens.refreshToken) {
+        sessionStorage.setItem('omni_ms_session_tokens', JSON.stringify(tokens));
+      } else {
+        sessionStorage.removeItem('omni_ms_session_tokens');
+      }
+    } catch {
+      // ignore
+    }
+  }
+}
+
 function getLocalItem(key: string): string | null {
   if (typeof localStorage !== 'undefined') {
     return localStorage.getItem(key);
@@ -59,29 +101,52 @@ function setLocalItem(key: string, val: string): void {
 }
 
 export function getStoredMsConfig(): MicrosoftSyncConfig {
-  try {
-    const raw = getLocalItem(MS_CONFIG_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {
-    console.error('Failed reading MS config', e);
-  }
-
-  // Check Vite environment variables for default client ID
-  const defaultClientId = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MS_CLIENT_ID) || '';
-  const defaultTenantId = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MS_TENANT_ID) || 'common';
-
-  return {
-    clientId: defaultClientId,
-    tenantId: defaultTenantId,
+  let baseConfig: MicrosoftSyncConfig = {
+    clientId: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MS_CLIENT_ID) || '',
+    tenantId: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MS_TENANT_ID) || 'common',
     isConnected: false,
     isMockMode: false,
     workbookName: 'OmniTracker_Data.xlsx',
   };
+
+  try {
+    const raw = getLocalItem(MS_CONFIG_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Ensure tokens are removed if previously in localStorage
+      delete parsed.accessToken;
+      delete parsed.refreshToken;
+      delete parsed.tokenExpiresAt;
+      baseConfig = { ...baseConfig, ...parsed };
+    }
+  } catch (e) {
+    console.error('Failed reading MS config', e);
+  }
+
+  const sessionTokens = getSessionTokens();
+  return {
+    ...baseConfig,
+    accessToken: sessionTokens.accessToken,
+    refreshToken: sessionTokens.refreshToken,
+    tokenExpiresAt: sessionTokens.tokenExpiresAt,
+  };
 }
 
 export function saveStoredMsConfig(config: MicrosoftSyncConfig): void {
+  // Move access/refresh tokens out of localStorage into memory + sessionStorage
+  saveSessionTokens({
+    accessToken: config.accessToken,
+    refreshToken: config.refreshToken,
+    tokenExpiresAt: config.tokenExpiresAt,
+  });
+
+  const safeConfig = { ...config };
+  delete safeConfig.accessToken;
+  delete safeConfig.refreshToken;
+  delete safeConfig.tokenExpiresAt;
+
   try {
-    setLocalItem(MS_CONFIG_KEY, JSON.stringify(config));
+    setLocalItem(MS_CONFIG_KEY, JSON.stringify(safeConfig));
   } catch (e) {
     console.error('Failed saving MS config', e);
   }
@@ -104,6 +169,9 @@ export class SyncService {
 
       // Listen for OAuth postMessage callback from popup
       window.addEventListener('message', async (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) {
+          return;
+        }
         if (event.data?.type === 'MS_OAUTH_CALLBACK') {
           await this.handleOAuthPopupMessage(event.data);
         }
@@ -249,8 +317,8 @@ export class SyncService {
     const clientId = sessionStorage.getItem('omni_ms_client_id') || '';
     const tenantId = sessionStorage.getItem('omni_ms_tenant_id') || 'common';
 
-    if (savedState && data.state && savedState !== data.state) {
-      return { success: false, message: 'OAuth state mismatch (potential CSRF). Authentication rejected.' };
+    if (!savedState || !data.state || savedState !== data.state) {
+      return { success: false, message: 'OAuth state missing or mismatch (potential CSRF). Authentication rejected.' };
     }
 
     if (!codeVerifier) {
@@ -339,22 +407,54 @@ export class SyncService {
    * Disconnects Microsoft account cleanly
    */
   public disconnectMicrosoftAccount(): void {
+    saveSessionTokens({});
     const current = getStoredMsConfig();
     const cleared: MicrosoftSyncConfig = {
       clientId: current.clientId,
       tenantId: current.tenantId || 'common',
       isConnected: false,
       isMockMode: false,
-      accessToken: undefined,
-      refreshToken: undefined,
-      tokenExpiresAt: undefined,
-      userEmail: undefined,
-      displayName: undefined,
       workbookName: current.workbookName || 'OmniTracker_Data.xlsx',
       lastSyncTimestamp: current.lastSyncTimestamp,
     };
     saveStoredMsConfig(cleared);
     this.notifyListeners();
+  }
+
+  /**
+   * Ensures an active, unexpired token, performing silent refresh if needed
+   */
+  public async ensureValidToken(): Promise<string | null> {
+    const config = getStoredMsConfig();
+    if (!config.isConnected) return null;
+    if (config.isMockMode) return config.accessToken || 'mock_token';
+
+    const now = Date.now();
+    const isExpiredOrClose = config.tokenExpiresAt && (config.tokenExpiresAt - now < 60000);
+
+    if ((!config.accessToken || isExpiredOrClose) && config.refreshToken && config.clientId) {
+      try {
+        const refreshed = await refreshMicrosoftAccessToken({
+          refreshToken: config.refreshToken,
+          clientId: config.clientId,
+          tenantId: config.tenantId,
+        });
+
+        const newExpiresAt = refreshed.expiresIn ? Date.now() + (refreshed.expiresIn * 1000) : undefined;
+        saveSessionTokens({
+          accessToken: refreshed.accessToken,
+          refreshToken: refreshed.refreshToken || config.refreshToken,
+          tokenExpiresAt: newExpiresAt,
+        });
+
+        return refreshed.accessToken;
+      } catch (err) {
+        console.warn('Silent token refresh failed:', err);
+        return config.accessToken || null;
+      }
+    }
+
+    return config.accessToken || null;
   }
 
   /**
@@ -413,8 +513,9 @@ export class SyncService {
         return { success: true, syncedCount: 0, message: 'All local records are up to date' };
       }
 
-      // Check if remote cloud adapter is active
-      if (!msConfig.isConnected || !msConfig.accessToken) {
+      // Check if remote cloud adapter is active and ensure valid token with silent refresh
+      const validToken = await this.ensureValidToken();
+      if (!msConfig.isConnected || !validToken) {
         // Honest sync reporting: records remain in local IndexedDB safely
         const logEntry: SyncLogEntry = {
           id: 'log_' + Date.now(),
@@ -437,7 +538,7 @@ export class SyncService {
       // 1. Initialize Client (Real or Mock)
       const isMock = Boolean(msConfig.isMockMode);
       const graphClient = new MicrosoftGraphExcelClient(
-        msConfig.accessToken,
+        validToken,
         msConfig.workbookName || 'OmniTracker_Data.xlsx'
       );
 

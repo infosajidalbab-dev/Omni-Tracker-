@@ -15,7 +15,10 @@ import {
   AlertTriangle,
   RefreshCw,
   ExternalLink,
-  Check
+  Check,
+  Languages,
+  FileText,
+  Compass
 } from 'lucide-react';
 import { 
   exportDatabaseBackup, 
@@ -29,6 +32,8 @@ import {
   type RestoreExecutionResult 
 } from '../../utils/backupUtils';
 import { BackupPreviewModal } from './BackupPreviewModal';
+import { LegalModal, type LegalDocType } from '../legal/LegalModal';
+import { useTranslation, type Language } from '../../utils/i18n';
 import type { ActiveTab } from '../../types';
 
 interface SettingsViewProps {
@@ -38,6 +43,7 @@ interface SettingsViewProps {
   onChangeCurrency: (sym: string) => void;
   onNavigateTab: (tab: ActiveTab) => void;
   onOpenOverlayGuide: () => void;
+  onOpenOnboarding?: () => void;
 }
 
 const CURRENCIES = [
@@ -55,10 +61,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onChangeCurrency,
   onNavigateTab,
   onOpenOverlayGuide,
+  onOpenOnboarding,
 }) => {
+  const { lang, changeLanguage, t } = useTranslation();
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetInput, setResetInput] = useState('');
+
+  // Legal modal state
+  const [legalModalType, setLegalModalType] = useState<LegalDocType | null>(null);
 
   // Safe Backup Preview states
   const [backupReport, setBackupReport] = useState<BackupInspectionReport | null>(null);
@@ -174,6 +185,48 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           >
             {theme === 'dark' ? <Moon className="w-4 h-4 text-[#FF7628]" /> : <Sun className="w-4 h-4 text-amber-500" />}
             <span>{theme === 'dark' ? 'Dark Theme' : 'Light Theme'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Language Section (Bangla / English) */}
+      <div className="glass-panel p-5">
+        <div className="flex items-center gap-2 mb-2">
+          <Languages className="w-4 h-4 text-[#FF7628]" />
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('language')}</h3>
+        </div>
+        <p className="text-xs text-slate-500 dark:text-[#9FA2AC] mb-3">
+          Choose interface language (English or বাংলা). Preferences are saved locally on your device.
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => changeLanguage('en')}
+            className={`flex items-center justify-between p-3 rounded-xl border text-xs font-semibold transition active:scale-95 cursor-pointer ${
+              lang === 'en'
+                ? 'bg-[#FF7628]/15 border-[#FF7628] text-slate-900 dark:text-white shadow-xs'
+                : 'glass-panel-subtle text-slate-600 dark:text-[#9FA2AC] hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <div className="flex flex-col text-left">
+              <span className="font-bold">English</span>
+              <span className="text-[10px] text-slate-500 dark:text-[#9FA2AC]">Default</span>
+            </div>
+            {lang === 'en' && <Check className="w-4 h-4 text-[#FF7628]" />}
+          </button>
+
+          <button
+            onClick={() => changeLanguage('bn')}
+            className={`flex items-center justify-between p-3 rounded-xl border text-xs font-semibold transition active:scale-95 cursor-pointer ${
+              lang === 'bn'
+                ? 'bg-[#FF7628]/15 border-[#FF7628] text-slate-900 dark:text-white shadow-xs'
+                : 'glass-panel-subtle text-slate-600 dark:text-[#9FA2AC] hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <div className="flex flex-col text-left">
+              <span className="font-bold">বাংলা (Bangla)</span>
+              <span className="text-[10px] text-slate-500 dark:text-[#9FA2AC]">স্থানীয় ভাষা</span>
+            </div>
+            {lang === 'bn' && <Check className="w-4 h-4 text-[#FF7628]" />}
           </button>
         </div>
       </div>
@@ -303,6 +356,74 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
       </div>
 
+      {/* Legal, Privacy & About Section */}
+      <div className="glass-panel p-5">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1.5">Legal, Privacy & About</h3>
+        <p className="text-xs text-slate-500 dark:text-[#9FA2AC] mb-3">
+          OMNI TRACKER guarantees that your tracking records stay strictly on your device unless you connect OneDrive.
+        </p>
+
+        <div className="space-y-2">
+          <button
+            onClick={() => setLegalModalType('privacy')}
+            className="glass-panel-subtle w-full flex items-center justify-between p-3 rounded-xl transition text-left cursor-pointer active:scale-98 hover:border-[#22C58B]/40"
+          >
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="w-4 h-4 text-[#22C58B]" />
+              <div>
+                <div className="text-xs font-bold text-slate-900 dark:text-white">{t('privacyPolicy')}</div>
+                <div className="text-[11px] text-slate-500 dark:text-[#9FA2AC]">All data stays on device; zero telemetry</div>
+              </div>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+          </button>
+
+          <button
+            onClick={() => setLegalModalType('terms')}
+            className="glass-panel-subtle w-full flex items-center justify-between p-3 rounded-xl transition text-left cursor-pointer active:scale-98 hover:border-[#FF7628]/40"
+          >
+            <div className="flex items-center gap-3">
+              <FileText className="w-4 h-4 text-[#FF7628]" />
+              <div>
+                <div className="text-xs font-bold text-slate-900 dark:text-white">{t('termsOfUse')}</div>
+                <div className="text-[11px] text-slate-500 dark:text-[#9FA2AC]">Open-source personal productivity terms</div>
+              </div>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+          </button>
+
+          <button
+            onClick={() => setLegalModalType('about')}
+            className="glass-panel-subtle w-full flex items-center justify-between p-3 rounded-xl transition text-left cursor-pointer active:scale-98 hover:border-purple-500/40"
+          >
+            <div className="flex items-center gap-3">
+              <Info className="w-4 h-4 text-purple-400" />
+              <div>
+                <div className="text-xs font-bold text-slate-900 dark:text-white">{t('aboutOmni')}</div>
+                <div className="text-[11px] text-slate-500 dark:text-[#9FA2AC]">Version 1.0.0 · Track Everything. Improve Every Day.</div>
+              </div>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+          </button>
+
+          {onOpenOnboarding && (
+            <button
+              onClick={onOpenOnboarding}
+              className="glass-panel-subtle w-full flex items-center justify-between p-3 rounded-xl transition text-left cursor-pointer active:scale-98 hover:border-sky-500/40"
+            >
+              <div className="flex items-center gap-3">
+                <Compass className="w-4 h-4 text-sky-400" />
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">{t('onboardingGuide')}</div>
+                  <div className="text-[11px] text-slate-500 dark:text-[#9FA2AC]">Review the 3-step feature tour</div>
+                </div>
+              </div>
+              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Dangerous Action: Reset Database */}
       <div className="glass-panel p-5 border-red-500/20 bg-red-500/5">
         <h3 className="text-sm font-bold text-red-500 dark:text-red-400 mb-1">Danger Zone</h3>
@@ -374,6 +495,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         onRestoreCompleted={handleRestoreCompleted}
         theme={theme}
       />
+
+      {/* Legal & About Modal */}
+      {legalModalType && (
+        <LegalModal
+          isOpen={Boolean(legalModalType)}
+          onClose={() => setLegalModalType(null)}
+          type={legalModalType}
+          theme={theme}
+        />
+      )}
     </div>
   );
 };

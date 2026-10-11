@@ -9,6 +9,7 @@
  */
 
 import 'fake-indexeddb/auto';
+import { describe, it } from 'vitest';
 import { 
   calculateCategoryBreakdown,
   calculateFrequentRoutes,
@@ -357,7 +358,8 @@ async function runTests() {
   console.log('=======================================\n');
 }
 
-runTests().catch((err) => {
-  console.error('\nTEST SUITE FAILED:', err);
-  process.exit(1);
+describe('OMNI TRACKER Analytics & Reliability', () => {
+  it('passes all analytics and Dexie tests', async () => {
+    await runTests();
+  });
 });
