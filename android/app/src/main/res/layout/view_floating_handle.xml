@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="40dp"
+    android:layout_height="64dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Translucent Liquid Glass Handle pill tab -->
+    <ImageView
+        android:id="@+id/imgHandle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_floating_handle"
+        android:contentDescription="OMNI Quick Capture Handle"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_omni_handle" />
+
+</FrameLayout>

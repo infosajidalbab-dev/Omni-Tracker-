@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OMNI TRACKER - Microsoft OAuth Callback</title>
+  <style>
+    body {
+      background: #101114;
+      color: #F7F7F8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 32px 24px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 118, 40, 0.2);
+      border-top-color: #FF7628;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h2 { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
+    p { margin: 0; font-size: 13px; color: #9FA2AC; line-height: 1.5; }
+    .btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      background: #FF7628;
+      color: white;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="spinner"></div>
+    <h2>Connecting Microsoft Account</h2>
+    <p id="status-msg">Completing authentication handshake. This window will close automatically...</p>
+    <a id="close-btn" href="/" class="btn" style="display: none;">Return to OMNI TRACKER</a>
+  </div>
+
+  <script>
+    (function() {
+      try {
+        var searchParams = new URLSearchParams(window.location.search);
+        var hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+
+        var code = searchParams.get('code') || hashParams.get('code');
+        var state = searchParams.get('state') || hashParams.get('state');
+        var error = searchParams.get('error') || hashParams.get('error');
+        var errorDescription = searchParams.get('error_description') || hashParams.get('error_description');
+        var accessToken = hashParams.get('access_token');
+
+        var message = {
+          type: 'MS_OAUTH_CALLBACK',
+          code: code,
+          state: state,
+          accessToken: accessToken,
+          error: error,
+          errorDescription: errorDescription
+        };
+
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage(message, '*');
+          setTimeout(function() {
+            window.close();
+          }, 350);
+        } else {
+          // If popup lost opener reference, persist in sessionStorage and allow returning
+          if (code) {
+            sessionStorage.setItem('omni_ms_pending_code', JSON.stringify({ code: code, state: state }));
+          }
+          document.getElementById('status-msg').innerText = 'Authentication token received. Please click below to return to the app.';
+          document.getElementById('close-btn').style.display = 'inline-block';
+        }
+      } catch (err) {
+        document.getElementById('status-msg').innerText = 'Authentication error: ' + (err.message || err);
+        document.getElementById('close-btn').style.display = 'inline-block';
+      }
+    })();
+  </script>
+</body>
+</html>

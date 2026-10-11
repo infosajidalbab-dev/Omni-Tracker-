@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #0c0d10;
+    --bg-surface: rgba(26, 28, 35, 0.65);
+    --bg-surface-elevated: rgba(34, 37, 46, 0.75);
+    --border-glass: rgba(255, 255, 255, 0.12);
+    --border-glass-subtle: rgba(255, 255, 255, 0.07);
+    --glass-shine: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+    --glass-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    --text-primary: #F8F9FA;
+    --text-secondary: #9FA2AC;
+    --text-muted: #6C707C;
+    --accent-orange: #FF7628;
+    --accent-orange-glow: rgba(255, 118, 40, 0.25);
+    --accent-emerald: #22C58B;
+    --accent-emerald-glow: rgba(34, 197, 139, 0.25);
+  }
+
+  .light {
+    --bg-main: #F4F6F9;
+    --bg-surface: rgba(255, 255, 255, 0.68);
+    --bg-surface-elevated: rgba(255, 255, 255, 0.85);
+    --border-glass: rgba(255, 255, 255, 0.82);
+    --border-glass-subtle: rgba(220, 226, 235, 0.7);
+    --glass-shine: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent);
+    --glass-shadow: 0 14px 30px -10px rgba(15, 23, 42, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+    --text-primary: #1A1D24;
+    --text-secondary: #5A606E;
+    --text-muted: #8E95A5;
+    --accent-orange: #FF7628;
+    --accent-orange-glow: rgba(255, 118, 40, 0.18);
+    --accent-emerald: #16A34A;
+    --accent-emerald-glow: rgba(22, 163, 74, 0.18);
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    touch-action: manipulation;
+    min-height: 100vh;
+  }
+}
+
+/* Liquid Glass Card Surface with Top Reflection Sheen */
+.glass-panel {
+  position: relative;
+  background: var(--bg-surface);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--glass-shadow);
+  border-radius: 1.25rem;
+  overflow: hidden;
+}
+
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--glass-shine);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Subtle Glass Surface for nested items */
+.glass-panel-subtle {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass-subtle);
+  border-radius: 1rem;
+}
+
+.light .glass-panel-subtle {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(226, 232, 240, 0.8);
+}
+
+/* Liquid Glass Mobile Floating Dock */
+.glass-dock {
+  position: relative;
+  background: rgba(22, 24, 30, 0.78);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.light .glass-dock {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+}
+
+.glass-dock::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  pointer-events: none;
+}
+
+.light .glass-dock::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 1), transparent);
+}
+
+/* Glass Form Inputs */
+.glass-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s ease-in-out;
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: #FF7628;
+  box-shadow: 0 0 0 3px rgba(255, 118, 40, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.light .glass-input {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(203, 213, 225, 0.8);
+}
+
+.light .glass-input:focus {
+  background: #ffffff;
+  border-color: #FF7628;
+  box-shadow: 0 0 0 3px rgba(255, 118, 40, 0.2);
+}
+
+/* Fallback for devices without backdrop-filter */
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-panel {
+    background: #1b1d24;
+  }
+  .light .glass-panel {
+    background: #ffffff;
+  }
+  .glass-dock {
+    background: #18191d;
+  }
+  .light .glass-dock {
+    background: #ffffff;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(160, 162, 170, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(160, 162, 170, 0.4);
+}
+
+/* Mobile safe padding */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0.5rem);
+}
+

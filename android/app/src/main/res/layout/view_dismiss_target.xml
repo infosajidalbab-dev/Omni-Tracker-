@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Bottom circle zone for dragging to close -->
+    <TextView
+        android:id="@+id/txtDismissTarget"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/bg_dismiss_circle"
+        android:gravity="center"
+        android:text="✕"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Drag here to dismiss"
+        android:textColor="#CCFFFFFF"
+        android:textSize="11sp" />
+
+</LinearLayout>

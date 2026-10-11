@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#101114"/>
+      <stop offset="100%" stop-color="#18191D"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9457"/>
+      <stop offset="100%" stop-color="#FF7628"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#22C58B"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded squircle with safe margin -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <rect x="8" y="8" width="496" height="496" rx="120" fill="none" stroke="#2A2C35" stroke-width="4"/>
+
+  <!-- Outer Tracking Arc (Orange) -->
+  <path d="M 256 96 A 160 160 0 1 1 112 320" fill="none" stroke="url(#orangeGrad)" stroke-width="42" stroke-linecap="round" filter="url(#glow)"/>
+
+  <!-- Inner Metric Arc (Green) -->
+  <path d="M 256 160 A 96 96 0 1 1 180 320" fill="none" stroke="url(#greenGrad)" stroke-width="26" stroke-linecap="round"/>
+
+  <!-- Central Pulse Target Dot -->
+  <circle cx="256" cy="256" r="28" fill="#F7F7F8"/>
+  <circle cx="256" cy="256" r="14" fill="#FF7628"/>
+
+  <!-- Forward Momentum Arrow Head on Track -->
+  <circle cx="256" cy="96" r="12" fill="#FFFFFF"/>
+</svg>
